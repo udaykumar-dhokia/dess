@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ user.first_name }} {{ user.last_name }}</title>
+    <title>{{ user.firstName }} {{ user.lastName }}</title>
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin />
     <link
@@ -109,7 +109,7 @@
               {{ error }}
           </div>
           {% endif %}
-          <a class="navbar-brand">{{ user.first_name }} {{ user.last_name }}</a>
+          <a class="navbar-brand">{{ user.firstName }} {{ user.lastName }}</a>
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             <li class="nav-item">
               <a class="nav-link" aria-current="page" href="#"><i class="bi bi-box"></i></a>
@@ -123,14 +123,14 @@
     <!-- Content -->
     <div class="content container mt-5">
       <h1 class="text-center">
-        Welcome, {{ user.first_name }} {{ user.last_name }}
+        Welcome, {{ user.firstName }} {{ user.lastName }}
       </h1>
 
       <div class="card mt-4">
         <div class="card-header">Your Profile Information</div>
         <div class="card-body">
-          <p><strong>First Name:</strong> {{ user.first_name }}</p>
-          <p><strong>Last Name:</strong> {{ user.last_name }}</p>
+          <p><strong>First Name:</strong> {{ user.firstName }}</p>
+          <p><strong>Last Name:</strong> {{ user.lastName }}</p>
           <p><strong>Email:</strong> {{ user.email }}</p>
         </div>
       </div>
