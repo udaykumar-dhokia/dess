@@ -1,0 +1,57 @@
+<!-- Sidebar for navigation -->
+<div class="sidebar sidebar-narrow-unfoldable">
+    <ul class="sidebar-nav">
+      <li class="compose nav-item mb-2">
+        <a
+          class="nav-link"
+          href="#"
+          data-coreui-toggle="modal"
+          data-coreui-target="#exampleModal"
+          data-coreui-whatever="{{ user.email }}"
+        >
+          <i class="nav-icon bi bi-plus"></i>Compose
+        </a>
+      </li>
+  
+      <!-- Inbox -->
+      <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'inbox' %}active{% endif %}" href="{{ url_for('inbox') }}">
+          <i class="nav-icon bi bi-inbox"></i>Inbox
+        </a>
+      </li>
+  
+      <!-- Sent -->
+      <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'sent' %}active{% endif %}" href="{{ url_for('sent') }}">
+          <i class="nav-icon bi bi-send"></i> Sent
+        </a>
+      </li>
+  
+      <!-- Starred -->
+      <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'starred' %}active{% endif %}" href="{{ url_for('starred') }}">
+          <i class="nav-icon bi bi-star"></i>Starred
+        </a>
+      </li>
+  
+      <!-- Draft -->
+      <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'draft' %}active{% endif %}" href="{{ url_for('draft') }}">
+          <i class="nav-icon bi bi-envelope-open"></i>Draft
+        </a>
+      </li>
+  
+      <li class="nav-item mt-auto">
+        <a class="nav-link {% if active_tab == 'settings' %}active{% endif %}" href="{{ url_for('settings') }}">
+          <i class="nav-icon bi bi-gear"></i>Settings
+        </a>
+      </li>
+  
+      <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'account' %}active{% endif %}" href="{{ url_for('account') }}">
+          <i class="nav-icon bi bi-person-circle"></i> Account
+        </a>
+      </li>
+    </ul>
+  </div>
+  
