@@ -3,7 +3,7 @@ import firebase_admin
 from firebase_admin import credentials, auth
 
 # Initialize the Firebase Admin SDK
-cred = credentials.Certificate('firebase/dmail-11bb6-firebase-adminsdk-4hkyf-1d618a571d.json')
+cred = credentials.Certificate('firebase/dess.json')
 firebase_admin.initialize_app(cred)
 
 # Pyrebase Configuration for Web API usage (use this for user signup/login)
@@ -20,14 +20,14 @@ import pyrebase
 # }
 
 firebaseConfig = {
-  'apiKey': "AIzaSyBJtv9e801Xn8grL2oEeg_ix1tYtiVnxQc",
-  'authDomain': "dmail-11bb6.firebaseapp.com",
-  'projectId': "dmail-11bb6",
-  'storageBucket': "dmail-11bb6.appspot.com",
-  'messagingSenderId': "1037426651907",
-  'appId': "1:1037426651907:web:c2611460264a9a87d06f36",
-  'measurementId': "G-FGZN3Z5158",
-  "databaseURL":""
+  "apiKey": "AIzaSyDfXfv2GAJMPwJO_4uCGaHOTHxkb8FBqHA",
+  "authDomain": "dess-2c181.firebaseapp.com",
+  "projectId": "dess-2c181",
+  "storageBucket": "dess-2c181.appspot.com",
+  "messagingSenderId": "781221941944",
+  "appId": "1:781221941944:web:4a2041ca386609738b9a4d",
+  "measurementId": "G-XJHFBE7DX0",
+  "databaseURL": "",
 };
 
 firebase = pyrebase.initialize_app(firebaseConfig)
