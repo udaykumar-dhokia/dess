@@ -106,26 +106,26 @@ def user(id):
         if response.data: 
             # Ensure that we have valid user data
             user_data = response.data[0]
-            print(user_data)
             user_email = user_data['email']
             user_private_key = users[user_email]['private_key']
-
+            
             # Fetch the received email hashes from the user's inbox
             received_hashes = user_data.get('inbox_mail', [])
             decrypted_emails = []
+            
+            if received_hashes:
+                for ipfs_hash in received_hashes:
+                    # Fetch the email record from IPFS (you may need to implement this function)
+                    email_record_json = fetch_from_pinata(ipfs_hash)
 
-            for ipfs_hash in received_hashes:
-                # Fetch the email record from IPFS (you may need to implement this function)
-                email_record_json = fetch_from_pinata(ipfs_hash)
-
-                if email_record_json:
-                    email_record = json.loads(email_record_json)
-                    # Decrypt the email body
-                    decrypted_body = decrypt_message(email_record['body'], user_private_key)
-                    email_record['body'] = decrypted_body  # Replace encrypted body with decrypted body
-                    email_record['formatted_timestamp'] = format_timestamp(email_record['timestamp'])
-                    decrypted_emails.append(email_record)
-                    print(decrypted_emails)
+                    if email_record_json:
+                        email_record = json.loads(email_record_json)
+                        # Decrypt the email body
+                        decrypted_body = decrypt_message(email_record['body'], user_private_key)
+                        email_record['body'] = decrypted_body  # Replace encrypted body with decrypted body
+                        email_record['formatted_timestamp'] = format_timestamp(email_record['timestamp'])
+                        decrypted_emails.append(email_record)
+                        print(decrypted_emails)
 
             return render_template('landing.html', user=user_data, active_tab='inbox', emails=decrypted_emails)
 

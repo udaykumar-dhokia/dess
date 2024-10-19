@@ -69,7 +69,7 @@
             </div>
             <div class="form-group mb-3">
                 <label for="body">Body</label>
-                <textarea class="form-control" id="body" name="body" rows="5" required></textarea>
+                <textarea class="form-control" id="body message-text" name="body" rows="5" required></textarea>
             </div>
             <button type="submit" class="btn btn-success btn-block">Send</button>
         </form>
@@ -97,7 +97,7 @@
     
         <div class="collapse navbar-collapse" id="navbarRightAlignExample">
           
-          <a class="navbar-brand">Inbox</a>
+          <a class="navbar-brand">{{ active_tab }}</a>
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             <li class="nav-item">
               <a class="nav-link" aria-current="page" href="#"><i class="bi bi-box"></i></a>
@@ -110,23 +110,29 @@
     <main class="container mt-5">
       <!-- <h2 class="mb-4 text-center">Your Emails</h2> -->
       {% if emails %}
-          <div class="list-group">
-              {% for email in emails %}
-                  <div class="list-group-item list-group-item-action flex-column align-items-start mb-3">
-                      <div class="d-flex w-100 justify-content-between align-items-center" >
-                          <h5 class="mb-1">{{ email.subject }}</h5>
-                          <small class="text-muted">{{ email.formatted_timestamp }}</small>
-                        </div>
-                        <!-- <button class="btn"><i class="bi bi-archive"></i></button> -->
-                      <p class="mb-1">{{ email.sender }}</p>
-                  </div>
-              {% endfor %}
-          </div>
-      {% else %}
-          <div class="alert alert-info text-center" role="alert">
-              No emails found in your inbox.
-          </div>
-      {% endif %}
+    <div class="list-group">  
+        {% for email in emails %}
+            <div class="list-group-item list-group-item-action p-2 mb-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-1">{{ email.subject }}</h6>
+                    <small class="text-muted">{{ email.formatted_timestamp }}</small>
+                </div>
+                
+                <!-- Row with subject, sender, and body -->
+                <div class="d-flex justify-content-between align-items-center text-truncate">
+                    <p class="small text-muted mb-0">{{ email.sender }}</p>
+                    <p class="small text-muted mb-0 text-center flex-grow-1 mx-2 text-truncate">{{ email.body | truncate(40) }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info text-center" role="alert">
+        No emails found in your inbox.
+    </div>
+{% endif %}
+
+
   </main>
   
 
