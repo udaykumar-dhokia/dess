@@ -1,0 +1,30 @@
+{
+    "cd@dmail.com": {
+        "emails": [],
+        "private_key": "8IfPFPufOY13PG8RvUX9LQTttpsMBy0dHcwmCHp3L9s=",
+        "received": [
+            "QmQRFxq37ef34ZwWJ7AMKG7mE39pwUanwmXwTKNQYZ7YHv",
+            "QmSvQH8bvybaXsFTzvxaTvLRNJsTMnXdNByZohgMEyN3T7"
+        ],
+        "sent": [
+            "QmTghiGpg9Zjsz7yDqFXRj9zuZ2H9jKBEdTzbumMtka5J6",
+            "QmV8aei14d6FNVEirY8UUMCmoniSXxF5K14dAzF7JJQkio",
+            "QmQMji6YoQc8CRyLwaUUpJ8T5kPUQu8ERv4dWaCAmHBn4W",
+            "QmP4USK2o7guBjAujmYbxap8YWP66Wq7YQNRp8M4S97FhV"
+        ]
+    },
+    "ud@dmail.com": {
+        "emails": [],
+        "private_key": "VR1IzG3d3BfTSlsO4blD5MVIkxKXCZfbgpKR0GY5DO8=",
+        "received": [
+            "QmTghiGpg9Zjsz7yDqFXRj9zuZ2H9jKBEdTzbumMtka5J6",
+            "QmV8aei14d6FNVEirY8UUMCmoniSXxF5K14dAzF7JJQkio",
+            "QmQMji6YoQc8CRyLwaUUpJ8T5kPUQu8ERv4dWaCAmHBn4W",
+            "QmP4USK2o7guBjAujmYbxap8YWP66Wq7YQNRp8M4S97FhV"
+        ],
+        "sent": [
+            "QmQRFxq37ef34ZwWJ7AMKG7mE39pwUanwmXwTKNQYZ7YHv",
+            "QmSvQH8bvybaXsFTzvxaTvLRNJsTMnXdNByZohgMEyN3T7"
+        ]
+    }
+}
