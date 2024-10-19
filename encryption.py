@@ -7,11 +7,9 @@ import json
 
 # Function to generate NaCl keys
 def generate_keys():
-    # Generate a new key pair
     private_key = nacl.public.PrivateKey.generate()
     public_key = private_key.public_key
 
-    # Encode the keys to a format that can be stored and transmitted
     return public_key.encode(encoder=nacl.encoding.Base64Encoder).decode('utf-8'), \
            private_key.encode(encoder=nacl.encoding.Base64Encoder).decode('utf-8')
 
@@ -33,7 +31,6 @@ def decrypt_message(encrypted_message, private_key_str):
     private_key = load_private_key(private_key_str)
     box = nacl.public.SealedBox(private_key)
 
-    # Decode the base64 encoded message
     encrypted_data = base64.b64decode(encrypted_message)
     decrypted_message = box.decrypt(encrypted_data)
     return decrypted_message.decode('utf-8')

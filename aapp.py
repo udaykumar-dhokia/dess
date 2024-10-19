@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, jsonify, json, flash
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from supabase import create_client, Client
 import secrets
-from datetime import datetime
-from encryption import generate_keys, encrypt_message, decrypt_message
-import requests
 import os
+import json
+from datetime import datetime
+import requests
+from web3 import Web3
+from encryption import generate_keys, encrypt_message, decrypt_message
 
 app = Flask(__name__)
 SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://chxfteilgshegswapudu.supabase.co')
@@ -15,7 +17,152 @@ app.secret_key = 'AIzaSyDfXfv2GAJMPwJO_4uCGaHOTHxkb8FBqHA'
 PINATA_API_KEY = '927a429a98f672d6736d'
 PINATA_API_SECRET = '1c699bbca60f57bfe5fd809abd67c8450410a88c7472201316af5a506f9368b8'
 
-def upload_to_pinata(email_record_json):    
+# Configure Web3 for Polygon Mumbai Testnet
+MUMBAI_RPC_URL = 'https://polygon-mumbai.infura.io/v3/e4d28daef2554058ae5d943b26043547'
+web3 = Web3(Web3.HTTPProvider(MUMBAI_RPC_URL))
+CONTRACT_ADDRESS = '0xf8e81D47203A594245E36C48e151709F0C19fBe8'
+CONTRACT_ABI = [
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": False,
+				"internalType": "uint256",
+				"name": "emailId",
+				"type": "uint256"
+			},
+			{
+				"indexed": False,
+				"internalType": "string",
+				"name": "sender",
+				"type": "string"
+			},
+			{
+				"indexed": False,
+				"internalType": "string",
+				"name": "recipient",
+				"type": "string"
+			},
+			{
+				"indexed": False,
+				"internalType": "string",
+				"name": "subject",
+				"type": "string"
+			},
+			{
+				"indexed": False,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			}
+		],
+		"name": "EmailSent",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "emailId",
+				"type": "uint256"
+			}
+		],
+		"name": "getEmail",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "sender",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "recipient",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "subject",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "body",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct EmailStorage.Email",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getEmailsBySender",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "sender",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "recipient",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "subject",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "body",
+				"type": "string"
+			}
+		],
+		"name": "sendEmail",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
+
+# Initialize the smart contract
+contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=CONTRACT_ABI)
+
+def upload_to_pinata(email_record_json):
     url = "https://api.pinata.cloud/pinning/pinFileToIPFS"
     
     files = {
@@ -33,7 +180,7 @@ def upload_to_pinata(email_record_json):
         return response.json().get('IpfsHash')
     else:
         return None
-    
+
 def fetch_from_pinata(ipfs_hash):
     url = f"https://gateway.pinata.cloud/ipfs/{ipfs_hash}"
     response = requests.get(url)
@@ -41,7 +188,6 @@ def fetch_from_pinata(ipfs_hash):
     if response.status_code == 200:
         return response.content.decode()
     else:
-        print(f"Error fetching from Pinata: {response.status_code}")
         return None
 
 def load_users():
@@ -97,15 +243,14 @@ def user(id):
     try:
         response = supabase.table('users').select('*').eq('uid', uid).execute()
 
-
         if response.data: 
             user_data = response.data[0]
             user_email = user_data['email']
             user_private_key = users[user_email]['private_key']
-            
+
             received_hashes = user_data.get('inbox_mail', [])
             decrypted_emails = []
-            
+
             if received_hashes:
                 for ipfs_hash in received_hashes:
                     email_record_json = fetch_from_pinata(ipfs_hash)
@@ -113,10 +258,9 @@ def user(id):
                     if email_record_json:
                         email_record = json.loads(email_record_json)
                         decrypted_body = decrypt_message(email_record['body'], user_private_key)
-                        email_record['body'] = decrypted_body 
+                        email_record['body'] = decrypted_body
                         email_record['formatted_timestamp'] = format_timestamp(email_record['timestamp'])
                         decrypted_emails.append(email_record)
-                        print(decrypted_emails)
 
             return render_template('landing.html', user=user_data, active_tab='inbox', emails=decrypted_emails)
 
@@ -127,36 +271,55 @@ def user(id):
         print(f"Error fetching user: {e}")
         return redirect(url_for('login'))
 
-
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        firstName = request.form.get("firstName")
-        lastName = request.form.get("lastName")
-        public_key, private_key = generate_keys()
-
-        try:
-            users[email] = {
-            'private_key': private_key,
-            'emails': []
-        }
-            
-            save_users(users)
-
-            uniqueId = secrets.token_hex(16)
-            user_data = {'email': email, "password": password, 'uid':uniqueId,"lastName": lastName, "firstName": firstName, "public_key": public_key}
-            supabase.table('users').insert(user_data).execute()
-
-            return render_template('auth/login.html')
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 400
-
-    return render_template('auth/signup.html')
-
+@app.route('/user/<id>', methods=['GET'])
+def user(id):
+    uid = id
     
+    if not uid:
+        return redirect(url_for('login'))
+
+    try:
+        # Fetch user data based on the UID
+        response = supabase.table('users').select('*').eq('uid', uid).execute()
+
+
+        if response.data: 
+            # Ensure that we have valid user data
+            user_data = response.data[0]
+            user_email = user_data['email']
+            user_private_key = users[user_email]['private_key']
+            
+            # Fetch the received email hashes from the user's inbox
+            received_hashes = user_data.get('inbox_mail', [])
+            decrypted_emails = []
+            
+            if received_hashes:
+                for ipfs_hash in received_hashes:
+                    # Fetch the email record from IPFS (you may need to implement this function)
+                    email_record_json = fetch_from_pinata(ipfs_hash)
+
+                    if email_record_json:
+                        email_record = json.loads(email_record_json)
+                        # Decrypt the email body
+                        decrypted_body = decrypt_message(email_record['body'], user_private_key)
+                        email_record['body'] = decrypted_body  # Replace encrypted body with decrypted body
+                        email_record['formatted_timestamp'] = format_timestamp(email_record['timestamp'])
+                        decrypted_emails.append(email_record)
+                        print(decrypted_emails)
+
+            return render_template('landing.html', user=user_data, active_tab='inbox', emails=decrypted_emails)
+
+        else:
+            # Redirect to login if no user found
+            return redirect(url_for('login'))
+
+    except Exception as e:
+        # Log the error and redirect to login on failure
+        print(f"Error fetching user: {e}")
+        return redirect(url_for('login'))
+
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -164,13 +327,17 @@ def login():
         password = request.form.get('password')
 
         try:
+            # Fetch both the password and UID
             response = supabase.table('users').select('password', 'uid').eq('email', email).execute()
             
+            # Check if data is returned
             if response.data:
                 userPassword = response.data[0]["password"]
                 user_uid = response.data[0]["uid"]
                 
+                # Verify password (consider hashing passwords in production)
                 if password == userPassword:
+                    # Redirect to the user's landing page using UID
                     return redirect(url_for('user', id=user_uid))
                 else:
                     return jsonify({'error': 'Invalid credentials'}), 401
@@ -181,7 +348,9 @@ def login():
             print(f"Error during login: {e}")
             return jsonify({'error': str(e)}), 400
 
+    # Render login form if GET request
     return render_template('auth/login.html')
+
 
 @app.route('/check-email', methods=['POST'])
 def check_email():
@@ -196,7 +365,6 @@ def check_email():
         return jsonify({"exists": True}), 200
     else:
         return jsonify({"exists": False}), 404
-    
 
 @app.route('/send-email', methods=['GET', 'POST'])
 def send_email():
@@ -209,6 +377,7 @@ def send_email():
 
         response = supabase.table("users").select("public_key").eq("email", recipient).execute()
         recipient_public_key = response.data[0]['public_key']
+        
         if recipient_public_key:
             encrypted_body = encrypt_message(body, recipient_public_key)
 
@@ -225,7 +394,6 @@ def send_email():
             ipfs_hash = upload_to_pinata(email_record_json)
 
             if ipfs_hash:
-                # Update sender and recipient records
                 if 'sent' not in users[sender]:
                     users[sender]['sent'] = []
                 users[sender]['sent'].append(ipfs_hash)
@@ -234,47 +402,44 @@ def send_email():
                     users[recipient]['received'] = []
                 users[recipient]['received'].append(ipfs_hash)
 
-                save_users(users)
+                save_users(users)  # Save the updated users data to file
+
+                # Store email metadata on the blockchain
+                store_email_on_chain(sender, recipient, email_data['subject'], ipfs_hash)
 
                 supabase.table('users').update({"inbox_mail": users[recipient]['received']}).eq("email", recipient).execute()
                 supabase.table('users').update({"outbox_mail": users[sender]['sent']}).eq('email', sender).execute()
 
-                # Flash success message and store IPFS hash in session
-                flash('Email sent successfully!', 'success')
-                return render_template('landing.html', user=userResponse.data[0], ipfs_hash=ipfs_hash)
+                flash('Email sent successfully!')
+                return redirect(url_for('user', id=userResponse.data[0]['uid']))
 
-        # Handle recipient not found
-        flash('Recipient not found!', 'error')
         return render_template('landing.html', user=userResponse.data[0], error="Recipient not found!")
 
     return render_template('landing.html', user=userResponse.data[0])
 
+def store_email_on_chain(sender, recipient, subject, ipfs_hash):
+    # Prepare the transaction
+    txn = contract.functions.sendEmail(recipient, subject, ipfs_hash).buildTransaction({
+        'from': sender,  # Ensure 'sender' is the user's address
+        'nonce': web3.eth.getTransactionCount(sender),
+        'gas': 2000000,
+        'gasPrice': web3.toWei('50', 'gwei')
+    })
 
+    # Sign the transaction (replace 'YOUR_PRIVATE_KEY' with the sender's actual private key)
+    signed_txn = web3.eth.account.signTransaction(txn, private_key='28531a9a1a584313c018b3ba556cf0e0f4044fe83a9a132b45e651b24da852ea')
+
+    # Send the transaction
+    txn_hash = web3.eth.sendRawTransaction(signed_txn.rawTransaction)
+    
+    # Wait for transaction receipt
+    txn_receipt = web3.eth.waitForTransactionReceipt(txn_hash)
+    
+    return txn_receipt
 
 def format_timestamp(timestamp):
     dt = datetime.fromisoformat(timestamp)
-    return dt.strftime('%d %B %Y, %I:%M %p')
-
-@app.route('/email/<email_id>')
-def view_email(email_id):
-    email_response = supabase.table("users").select('inbox_mail').eq("email", email_id).execute()
-    
-    if email_response.data:
-        email = email_response.data[0]
-        user_email = email_response['email']
-        user_private_key = users[user_email]['private_key']
-        email['body'] = decrypt_message(email['body'], user_private_key)
-        return render_template('view_email.html', email=email)
-    else:
-        flash("Email not found!")
-        return redirect(url_for('landing_page'))
-
-
-    
-@app.route('/logout')
-def logout():
-    return redirect(url_for('login'))
-
+    return dt.strftime('%Y-%m-%d %H:%M:%S')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=5000,debug=True)
+    app.run(debug=True)

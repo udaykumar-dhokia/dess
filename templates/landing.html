@@ -26,6 +26,7 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@5.1.2/dist/css/coreui.min.css" rel="stylesheet" integrity="sha384-lBISJVJ49zh34fnUuAaSAyuYzQ2ioGvhm4As4Z1JFde0kVpaC1FFWD3f9adpZrdD" crossorigin="anonymous">
     <link
       href="{{ url_for('static', filename='assets/css/main.css') }}"
       rel="stylesheet"
@@ -45,6 +46,33 @@
   <body>
    
     {% include 'components/sidebar.html' %}
+
+    <!-- Toast for Success -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="toast-success" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+    <div class="toast-header bg-success text-white">
+      <strong class="me-auto">Success</strong>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      Email sent successfully! IPFS Hash: <span id="success-hash"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Toast for Error -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="toast-error" class="toast bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+    <div class="toast-header bg-danger text-white">
+      <strong class="me-auto">Error</strong>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      There was an error sending the email. Please try again.
+    </div>
+  </div>
+</div>
+
 
     <div class="modal fade modal-lg" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -71,7 +99,7 @@
                 <label for="body">Body</label>
                 <textarea class="form-control" id="body message-text" name="body" rows="5" required></textarea>
             </div>
-            <button type="submit" class="btn btn-success btn-block">Send</button>
+            <button type="submit" class="btn btn-dark btn-block">Send</button>
         </form>
         </div>
         </div>
@@ -97,10 +125,13 @@
     
         <div class="collapse navbar-collapse" id="navbarRightAlignExample">
           
-          <a class="navbar-brand">{{ active_tab }}</a>
+          <a class="navbar-brand">{% if active_tab == 'inbox' %}Inbox{% endif %}</a>
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             <li class="nav-item">
               <a class="nav-link" aria-current="page" href="#"><i class="bi bi-box"></i></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="/logout"><i class="bi bi-box-arrow-right"></i></a>
             </li>
         </div>
         
@@ -108,32 +139,35 @@
     </nav>
 
     <main class="container mt-5">
-      <!-- <h2 class="mb-4 text-center">Your Emails</h2> -->
       {% if emails %}
-    <div class="list-group">  
-        {% for email in emails %}
-            <div class="list-group-item list-group-item-action p-2 mb-2">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-1">{{ email.subject }}</h6>
-                    <small class="text-muted">{{ email.formatted_timestamp }}</small>
+        <div class="accordion accordion-flush" id="emailAccordion">
+          {% for email in emails %}
+            <div class="accordion-item border rounded shadow-sm my-1">
+              <h2 class="accordion-header" id="heading-{{ loop.index }}">
+                <button class="accordion-button collapsed py-3 text-dark" style="background-color: white;" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ loop.index }}" aria-expanded="false" aria-controls="collapse-{{ loop.index }}">
+                  <strong>{{ email.subject }}</strong>
+                </button>
+              </h2>
+              <div id="collapse-{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ loop.index }}" data-bs-parent="#emailAccordion">
+                <div class="accordion-body py-3 px-4">
+                  <!-- Email Details -->
+                  <p><strong>From:</strong> {{ email.sender }}</p>
+                  <p><strong>Body:</strong> {{ email.body }}</p>
+                  <small class="text-muted"><em>Sent on: {{ email.formatted_timestamp }}</em></small>
                 </div>
-                
-                <!-- Row with subject, sender, and body -->
-                <div class="d-flex justify-content-between align-items-center text-truncate">
-                    <p class="small text-muted mb-0">{{ email.sender }}</p>
-                    <p class="small text-muted mb-0 text-center flex-grow-1 mx-2 text-truncate">{{ email.body | truncate(40) }}</p>
-                </div>
+              </div>
             </div>
-        {% endfor %}
-    </div>
-{% else %}
-    <div class="alert alert-info text-center" role="alert">
-        No emails found in your inbox.
-    </div>
-{% endif %}
-
-
-  </main>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-info text-center" role="alert">
+          No emails found in your inbox.
+        </div>
+      {% endif %}
+    </main>
+    
+    
+    
   
 
 
@@ -295,5 +329,19 @@ const emailInput = document.getElementById('recipient'); // Updated to match inp
     sendButton.setAttribute('disabled', true);
   });
   </script>
+  <script>
+    function showSuccessToast(ipfsHash) {
+      document.getElementById("success-hash").textContent = ipfsHash;
+      var successToast = new bootstrap.Toast(document.getElementById("toast-success"));
+      successToast.show();
+    }
+  
+    function showErrorToast() {
+      var errorToast = new bootstrap.Toast(document.getElementById("toast-error"));
+      errorToast.show();
+    }
+  </script>
+  
+  
 
 </html>
