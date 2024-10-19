@@ -22,11 +22,10 @@
   
       <!-- Sent -->
       <li class="nav-item">
-        <a class="nav-link {% if active_tab == 'sent' %}active{% endif %}" href="{{ url_for('sent') }}">
-          <i class="nav-icon bi bi-send"></i> Sent
+        <a class="nav-link {% if active_tab == 'sent' %}active{% endif %}" href="{{ url_for('outbox', email = user.email) }}">
+            <i class="nav-icon bi bi-send"></i> Sent
         </a>
-      </li>
-  
+    </li>
       <!-- Starred -->
       <li class="nav-item">
         <a class="nav-link {% if active_tab == 'starred' %}active{% endif %}" href="{{ url_for('starred') }}">
