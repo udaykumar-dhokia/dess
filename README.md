@@ -118,5 +118,3 @@ Decentralized systems face scalability challenges, particularly with:
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
-
-Feel free to adjust the content and add additional sections as needed. This structure outlines your project's goals, technologies, setup instructions, and benefits concisely.
